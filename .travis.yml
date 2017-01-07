@@ -1,23 +1,44 @@
-os:
-  - linux
-  - osx
-
-env:
-  - SWIFT_VERSION=3.0
-  - SWIFT_VERSION=3.0.1
-
 language: generic
-sudo: required
-dist: trusty
-osx_image: xcode8
 
-services:
-  - mysql
+matrix:
+  allow_failures:
+    - osx_image: xcode8.1
+  include:
+    - os: osx
+      osx_image: xcode8
+      env: VERSION=3.0
+    - os: osx
+      osx_image: xcode8.1
+      env: VERSION=3.0.1
+    - os: osx
+      osx_image: xcode8.2
+      env: VERSION=3.0.2
+    - os: linux
+      sudo: required
+      dist: trusty
+      env: VERSION=3.0
+    - os: linux
+      sudo: required
+      dist: trusty
+      env: VERSION=3.0.1
+    - os: linux
+      sudo: required
+      dist: trusty
+      env: VERSION=3.0.2
 
 install:
-  - eval "$(curl -sL https://gist.githubusercontent.com/kylef/5c0475ff02b7c7671d2a/raw/9f442512a46d7a2af7b850d65a7e9bd31edfb09b/swiftenv-install.sh)"
-  - eval "$(curl -sL toolbox.qutheory.io)"
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      brew update;
+      brew install mysql;
+    else
+      wget https://dev.mysql.com/get/mysql-apt-config_0.8.1-1_all.deb;
+      sudo dpkg -i mysql-apt-config_0.8.1-1_all.deb;
+      sudo apt-get -qq update;
+      sudo apt-get install -y mysql-server libmysqlclient-dev;
+    fi
+
+before_script:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then BUILD_ARGS="-Xswiftc -I/usr/local/include/mysql -Xlinker -L/usr/local/lib"; fi
 
 script:
-  - vapor build --mysql
-  - vapor build --mysql --release=true
+  - BUILD_ARGS=$BUILD_ARGS ./travis/ci.sh

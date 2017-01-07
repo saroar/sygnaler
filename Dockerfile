@@ -15,7 +15,7 @@ RUN apt-get update && \
     update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.6 100
 
 # Install MySQL
-RUN apt-get install -y libmysqlclient18 libmysqlclient-dev
+RUN apt-get install -y libmysqlclient20 libmysqlclient-dev
 
 # Clean APT cache
 RUN apt-get clean && \

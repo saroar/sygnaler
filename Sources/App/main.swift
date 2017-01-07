@@ -1,9 +1,8 @@
 import Vapor
 import VaporMySQL
 
-let drop = Droplet(
-  providers: [VaporMySQL.Provider.self]
-)
+let drop = Droplet()
+try drop.addProvider(VaporMySQL.Provider)
 
 drop.get { req in
     return try drop.view.make("welcome", [
