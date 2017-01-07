@@ -3,14 +3,22 @@
 
 FROM ubuntu:16.04
 
-ENV SWIFT_BRANCH=swift-3.0.1-release SWIFT_VERSION=swift-3.0.1-RELEASE SWIFT_PLATFORM=ubuntu16.04
+ENV SWIFT_BRANCH=swift-3.0.1-release
+ARG SWIFT_VERSION
+ENV SWIFT_VERSION ${SWIFT_VERSION}
+ENV SWIFT_PLATFORM ubuntu16.04
 
 # Install related packages and set LLVM 3.6 as the compiler
 RUN apt-get update && \
     apt-get install -y build-essential wget clang-3.6 vim curl libedit-dev python2.7 python2.7-dev libicu-dev rsync libxml2 git libcurl4-openssl-dev && \
     update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.6 100 && \
-    update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.6 100 && \
-    apt-get clean && \
+    update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.6 100
+
+# Install MySQL
+RUN apt-get install -y libmysqlclient18 libmysqlclient-dev
+
+# Clean APT cache
+RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install Swift keys

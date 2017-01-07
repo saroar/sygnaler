@@ -56,6 +56,12 @@ brew install vapor/tap/toolbox
 curl -sL toolbox.vapor.sh | bash
 ```
 
+#### Building
+
+```sh
+vapor build --mysql
+```
+
 ## Manual Deploy
 
 When deploying, one may optionally include the `secrets` folder if they have a secure way of doing so. The official deploy is done through use of environment variables configured on the server that match the following scheme.
