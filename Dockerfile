@@ -3,7 +3,7 @@
 
 FROM ubuntu:16.04
 
-ENV SWIFT_BRANCH=swift-3.0.2-release SWIFT_VERSION=swift-3.0.2-RELEASE SWIFT_PLATFORM=ubuntu16.04
+ENV SWIFT_BRANCH=swift-3.0.1-release SWIFT_VERSION=swift-3.0.1-RELEASE SWIFT_PLATFORM=ubuntu16.04
 
 # Install related packages and set LLVM 3.6 as the compiler
 RUN apt-get update && \
