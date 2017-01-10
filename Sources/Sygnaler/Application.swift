@@ -6,10 +6,12 @@ public final class Application {
 
     public init(testing: Bool = false) throws {
         var args = CommandLine.arguments
+        
         if testing {
             // Simulate passing `--env=testing` from the
             // command line if testing is true.
-            args.append("--env=testing")
+            args.append("/dummy/path/")
+            args.append("prepare")
         }
 
         /// Droplets are service containers that make accessing all of Vapor's features easy.
