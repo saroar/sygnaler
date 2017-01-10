@@ -1,5 +1,13 @@
 language: generic
 
+env:
+  global:
+    - MYSQL_HOST=localhost
+    - MYSQL_USER=root
+    - MYSQL_PASS=""
+    - MYSQL_DB=sygnaler_test
+    - MYSQL_PORT=3306
+
 matrix:
   allow_failures:
     - osx_image: xcode8.1
@@ -26,19 +34,29 @@ matrix:
       dist: trusty
       env: VERSION=3.0.2
 
-install:
+before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       brew update;
       brew install mysql;
+      brew link mysql;
+      mysql.server start;
     else
-      wget https://dev.mysql.com/get/mysql-apt-config_0.8.1-1_all.deb;
-      sudo dpkg -i mysql-apt-config_0.8.1-1_all.deb;
-      sudo apt-get -qq update;
+      sudo apt-get update;
       sudo apt-get install -y mysql-server libmysqlclient-dev;
+      sudo mysql_install_db;
     fi
 
+  - mysql -u root --password="" -e 'CREATE DATABASE IF NOT EXISTS sygnaler_test';
+
 before_script:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then BUILD_ARGS="-Xswiftc -I/usr/local/include/mysql -Xlinker -L/usr/local/lib"; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      BUILD_ARGS="-Xswiftc -I/usr/local/include/mysql -Xlinker -L/usr/local/lib";
+    else
+      BUILD_ARGS="-Xswiftc -DNOJSON";
+    fi
 
 script:
   - BUILD_ARGS=$BUILD_ARGS ./travis/ci.sh
+
+after_success:
+  - BUILD_ARGS=$BUILD_ARGS ./travis/codecov.sh
