@@ -10,22 +10,24 @@ class SygnalerTests: XCTestCase {
     static var allTests = [
         ("testExampleEndpoint", testExampleEndpoint)
     ]
-    
+
     func testExampleEndpoint() throws {
         let app = try Application(testing: true)
         let drop = try app.getDroplet()
-        
+
         do {
             try drop.runCommands()
         } catch {
             drop.log.error("\(error)")
         }
-        
-        let request = try Request(method: .get, uri: "/test")
-        
+
+        let request = try Request(method: .get, uri: "/version")
+
         let response = try drop.respond(to: request)
         XCTAssertEqual(response.status, .ok)
-        XCTAssertEqual(response.body.bytes?.string, "Hello, World!")
+        
+        let json = try JSON(bytes: response.body.bytes!)
+        XCTAssertEqual(json["version"]?.string, "0.0.1-alpha")
     }
 }
 
