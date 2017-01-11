@@ -1,9 +1,23 @@
 {
-    "name": "VaporApp",
+    "name": "sygnaler",
+    "description": "Alternative Push Gateway for Matrix",
+    "website": "https://github.com/gperdomor/sygnaler",
+    "repository": "https://github.com/gperdomor/sygnaler",
+    "keywords": [
+      "sygnaler",
+      "sygnaler-gateway",
+      "push-gateway",
+      "notification-gateway",
+      "matrix",
+      "swift",
+      "vapor"
+    ],
     "scripts": {},
     "env": {},
     "formation": {},
-    "addons": [],
+    "addons": [
+      "jawsdb"
+    ],
     "buildpacks": [
         {
             "url": "https://github.com/vapor/heroku-buildpack"
