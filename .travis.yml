@@ -8,6 +8,10 @@ env:
     - MYSQL_DB=sygnaler_test
     - MYSQL_PORT=3306
 
+cache:
+  directories:
+  - Packages
+
 matrix:
   allow_failures:
     - osx_image: xcode8.1
