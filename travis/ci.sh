@@ -58,13 +58,13 @@ then
     exit 1;
 fi
 
-#echo "🔎 Testing";
+echo "🔎 Testing";
 
-#swift test $BUILD_ARGS
-#if [[ $? != 0 ]];
-#then
-#    echo "❌ Tests failed";
-#    exit 1;
-#fi
+swift test $BUILD_ARGS
+if [[ $? != 0 ]];
+then
+    echo "❌ Tests failed";
+    exit 1;
+fi
 
 echo "✅ Done"
