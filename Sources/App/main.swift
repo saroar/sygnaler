@@ -1,15 +1,4 @@
-import Vapor
-import VaporMySQL
+import Sygnaler
 
-let drop = Droplet()
-try drop.addProvider(VaporMySQL.Provider)
-
-drop.get { req in
-    return try drop.view.make("welcome", [
-    	"message": drop.localization[req.lang, "welcome", "title"]
-    ])
-}
-
-drop.resource("posts", PostController())
-
-drop.run()
+let app = try Application()
+app.start()
