@@ -13,7 +13,7 @@ extension Error: Preparation {
             errors.data("apns_payload")
         }
     }
-    
+
     static func revert(_ database: Database) throws {
         try database.delete("errors")
     }

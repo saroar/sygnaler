@@ -6,7 +6,7 @@ public final class Application {
 
     public init(testing: Bool = false) throws {
         var args = CommandLine.arguments
-        
+
         if testing {
             // Simulate passing `--env=testing` from the
             // command line if testing is true.
@@ -18,7 +18,7 @@ public final class Application {
         /// Just call `drop.run()` to serve your application or `drop.client()` to create a
         /// client for request data from other servers.
         let drop = Droplet(arguments: args)
-        
+
         for provider in providers {
             try drop.addProvider(provider)
         }

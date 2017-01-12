@@ -12,8 +12,8 @@ final class ErrorController: ResourceRepresentable {
 
     func makeResource() -> Resource<Error> {
         return Resource(
-            index: index,
-            show: show
+                index: index,
+                show: show
         )
     }
 }

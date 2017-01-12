@@ -10,12 +10,12 @@ final class Error: Model {
     var tokenInvalidatedAt: Int
     var originalPayload: Node
     var apnsPayload: Node
-    
+
     // used by fluent internally
     var exists: Bool = false
-    
+
     // MARK: NodeConvertible
-    
+
     init(node: Node, in context: Context) throws {
         self.id = try node.extract("id")
         self.token = try node.extract("token")
@@ -26,15 +26,15 @@ final class Error: Model {
         self.originalPayload = try node.extract("original_payload")
         self.apnsPayload = try node.extract("apns_payload")
     }
-    
+
     func makeNode(context: Context) throws -> Node {
         return try Node(node: [
-            "id": id,
-            "token": token,
-            "last_failure_ts": lastFailureTs,
-            "last_failure_type": lastFailureType,
-            "original_payload": originalPayload,
-            "apns_payload": apnsPayload
-            ])
+                "id": id,
+                "token": token,
+                "last_failure_ts": lastFailureTs,
+                "last_failure_type": lastFailureType,
+                "original_payload": originalPayload,
+                "apns_payload": apnsPayload
+        ])
     }
 }
