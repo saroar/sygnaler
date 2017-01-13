@@ -38,16 +38,7 @@ matrix:
       env: VERSION=3.0.2
 
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      brew update;
-      brew install mysql;
-      brew link mysql;
-      mysql.server start;
-    else
-      sudo apt-get update;
-      sudo apt-get install -y mysql-server libmysqlclient-dev;
-      sudo mysql_install_db;
-    fi
+  - ./travis/install_deps_$TRAVIS_OS_NAME.sh
 
   - mysql -u root --password="" -e 'CREATE DATABASE IF NOT EXISTS sygnaler_test';
 
@@ -57,6 +48,9 @@ before_script:
     else
       BUILD_ARGS="-Xswiftc -DNOJSON";
     fi
+
+  # Generate dummy files
+  - ./travis/generate_fake_certs.sh
 
 script:
   - BUILD_ARGS=$BUILD_ARGS ./travis/ci.sh
