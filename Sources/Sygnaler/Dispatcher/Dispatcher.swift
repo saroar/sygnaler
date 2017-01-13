@@ -60,7 +60,7 @@ public class Dispatcher {
 
             guard let pusher = map[appId] else {
                 rejected.append(pushKey)
-                //self.logger?.info("Got notification for unknown app ID \(appId)")
+                self.logger?.info("Got notification for unknown app ID \(appId)")
                 continue
             }
 
@@ -70,31 +70,33 @@ public class Dispatcher {
 
             // Set tweaks for device
 
-            let pushMessage = ApplePushMessage(topic: appId, priority: prio, payload: payload!, sandbox: pusher.sandbox)
+            let pushMessage = ApplePushMessage(priority: prio, payload: payload!, sandbox: pusher.sandbox)
 
             var shouldStop = false
 
             while tries < self.MAX_TRIES {
+
                 let result = pusher.send(pushMessage, to: pushKey)
 
                 switch (result) {
                 case let .success(messageId, deviceToken, serviceStatus):
-                    //self.logger?.warning("[SENDING] \(notification.id): \(serviceStatus)")
+                    self.logger?.warning("[SENDING] \(notification.id): \(serviceStatus)")
                     shouldStop = serviceStatus == .success
                     break
 
                 case let .error(messageId, deviceToken, error):
-                    //self.logger?.warning("[SENDING] \(notification.id): \(error)")
+                    self.logger?.warning("[SENDING] \(notification.id): \(error)")
                     switch (error) {
                     case .tooManyRequests, .idleTimeout, .shutdown, .internalServerError, .serviceUnavailable:
                         shouldStop = false
                     default:
+                        rejected.append(pushKey)
                         shouldStop = true
                     }
                     break
 
                 case let .networkError(error):
-                    //self.logger?.warning("[SENDING] \(notification.id): \(error)")
+                    self.logger?.warning("[SENDING] \(notification.id): \(error)")
                     shouldStop = false
                     break
                 }
@@ -107,7 +109,8 @@ public class Dispatcher {
             }
 
             if tries == self.MAX_TRIES {
-                //self.logger?.info("[SENDING] \(notification.id): Max retries exceeded")
+                rejected.append(pushKey)
+                self.logger?.info("[SENDING] \(notification.id): Max retries exceeded")
             }
         }
 
@@ -237,7 +240,7 @@ public class Dispatcher {
          }*/
 
         if locKey == nil, payload.badge == nil {
-            //self.logger?.warning("[PAYLOAD] \(notification.id): Nothing to do for alert of type \(notification.type)")
+            self.logger?.warning("[PAYLOAD] \(notification.id): Nothing to do for alert of type \(notification.type)")
         }
 
         if locKey != nil, let roomId = notification.roomId {
