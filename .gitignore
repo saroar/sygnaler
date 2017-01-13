@@ -3,3 +3,8 @@ Packages
 xcuserdata
 *.xcodeproj
 Config/secrets
+Config/certs/*
+!Config/certs/.gitkeep
+
+.idea/
+.vscode
