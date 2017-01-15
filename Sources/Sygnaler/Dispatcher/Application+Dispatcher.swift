@@ -4,8 +4,8 @@ import VaporAPNS
 extension Application {
     internal func setupPushers(_ drop: Droplet) throws {
         guard let config = drop.config["pushers"]?.object,
-            let apps = config["apps"]?.object else {
-                throw AppError.noPusherConfig
+              let apps = config["apps"]?.object else {
+            throw AppError.noPusherConfig
         }
 
         Dispatcher.set(maxTries: config["max_tries"]?.int ?? 3)

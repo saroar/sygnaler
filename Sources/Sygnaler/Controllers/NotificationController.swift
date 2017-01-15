@@ -14,11 +14,10 @@ final class NotificationController {
             throw Abort.custom(status: .badRequest, message: "No devices in notification")
         }
 
-        let rejected = notification.send()
+        let rejected = try notification.send()
 
         return try JSON(node: [
-                "rejected": rejected.makeJSON(),
-                "notification": notification.makeNode()
+                "rejected": rejected.makeJSON()
         ])
     }
 }

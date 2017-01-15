@@ -3,7 +3,7 @@ import Vapor
 import VaporAPNS
 
 extension Notification {
-    func send() -> [String] {
-        return Dispatcher.send(notification: self)
+    func send() throws -> [String] {
+        return try Dispatcher.send(notification: self)
     }
 }

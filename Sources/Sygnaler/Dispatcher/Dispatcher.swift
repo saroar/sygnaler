@@ -48,7 +48,7 @@ public class Dispatcher {
         return self.map.count
     }
 
-    static func send(notification: Notification) -> [String] {
+    static func send(notification: Notification) throws -> [String] {
         var rejected = [String]()
         var payload: Payload?
         let prio: ApplePushMessage.Priority = notification.priority == Priority.high ? .immediately : .energyEfficient
@@ -65,7 +65,7 @@ public class Dispatcher {
             }
 
             if payload == nil {
-                payload = self.buildPayload(notification: notification)
+                payload = try self.buildPayload(notification: notification)
             }
 
             // Set tweaks for device
@@ -117,56 +117,77 @@ public class Dispatcher {
         return rejected
     }
 
-    static func buildPayload(notification: Notification) -> Payload {
-        let payload = Payload()
+    private static func getSenderName(_ notification: Notification) -> String {
+        return notification.senderDisplayName ?? notification.sender
+    }
 
-        var fromDisplay = notification.sender
+    private static func getBadge(_ notification: Notification) -> Int? {
+        if let counts = notification.counts {
+            var badge = 0
 
-        if let name = notification.senderDisplayName {
-            fromDisplay = name
+            if let unread = counts.unread {
+                badge = badge + unread
+            }
+
+            if let missedCalls = counts.missedCalls {
+                badge = badge + missedCalls
+            }
+
+            return badge
         }
 
+        return nil
+    }
+
+    static func buildPayload(notification: Notification) throws -> Payload {
+        let payload = Payload()
+        let fromDisplay = self.getSenderName(notification)
         var locKey: String?
         var locArgs: [String]?
 
+        payload.contentAvailable = true
+        payload.extra["badge"] = self.getBadge(notification)
+
+        if let roomId = notification.roomId {
+            payload.extra["thread-id"] = roomId
+        }
+
         switch (notification.type) {
         case "m.room.message", "m.room.encrypted":
-            let roomDisplay: String? = notification.roomName ?? notification.roomAlias
-            var contentDisplay, actionDisplay: String?
-            var isImage = false
+            payload.extra["category"] = "MESSAGE"
 
-            if let content = notification.content?.node, let messageType: String = content["msgtype"]?.string,
-               let body: String = content["body"]?.string {
+            let roomDisplayName: String? = notification.roomName ?? notification.roomAlias
+            var image, contentDisplay, actionDisplay: String?
+
+            if let content = notification.content?.node, let messageType: String = content["msgtype"]?.string, let body: String = content["body"]?.string {
 
                 switch (messageType) {
+                case "m.image": // Important: Not break this case
+                    image = content["url"]?.string
+                    payload.extra["image"] = image
                 case "m.text":
                     contentDisplay = body
                     break
                 case "m.emote":
                     actionDisplay = body
                     break
-                case "m.image":
-                    isImage = true
-                    break
+
                 default:
                     contentDisplay = body
                     break
                 }
             }
 
-            if roomDisplay != nil {
+            if roomDisplayName != nil {
                 if contentDisplay != nil {
                     locKey = "MSG_FROM_USER_IN_ROOM_WITH_CONTENT"
-                    locArgs = [fromDisplay, roomDisplay!, contentDisplay!]
+                    locArgs = [fromDisplay, roomDisplayName!, contentDisplay!]
                 } else if actionDisplay != nil {
                     locKey = "ACTION_FROM_USER_IN_ROOM"
-                    locArgs = [roomDisplay!, fromDisplay, actionDisplay!]
-                } else if isImage {
-                    locKey = "IMAGE_FROM_USER_IN_ROOM"
-                    locArgs = [fromDisplay, roomDisplay!]
+                    locArgs = [roomDisplayName!, fromDisplay, actionDisplay!]
                 } else {
                     locKey = "MSG_FROM_USER_IN_ROOM"
-                    locArgs = [fromDisplay, roomDisplay!]
+                    locArgs = [fromDisplay, roomDisplayName!]
                 }
             } else {
                 if contentDisplay != nil {
@@ -175,14 +196,12 @@ public class Dispatcher {
                 } else if actionDisplay != nil {
                     locKey = "ACTION_FROM_USER"
                     locArgs = [fromDisplay, actionDisplay!]
-                } else if isImage {
-                    locKey = "IMAGE_FROM_USER"
-                    locArgs = [fromDisplay]
                 } else {
                     locKey = "MSG_FROM_USER"
                     locArgs = [fromDisplay]
                 }
             }
+
             break
 
         case "m.call.invite":
@@ -193,6 +212,7 @@ public class Dispatcher {
         case "m.room.member":
             if notification.userIsTarget! {
                 if let membership = notification.membership, membership == "invite" {
+                    payload.extra["category"] = "ROOM_INVITE"
                     if let roomName = notification.roomName {
                         locKey = "USER_INVITE_TO_NAMED_ROOM"
                         locArgs = [fromDisplay, roomName]
@@ -212,40 +232,12 @@ public class Dispatcher {
             /// but it was important enough for a push to have got to us
             locKey = "MSG_FROM_USER"
             locArgs = [fromDisplay]
+            payload.extra["category"] = "MESSAGE"
             break
         }
 
-        if locKey != nil {
-            payload.bodyLocKey = locKey
-        }
-
-        if locArgs != nil {
-            payload.bodyLocArgs = locArgs
-        }
-
-        if let unread = notification.counts?.unread {
-            payload.badge = unread
-        }
-
-        if let missedCalls = notification.counts?.missedCalls {
-            if payload.badge == 0 {
-                payload.badge = 0
-            }
-
-            payload.badge = payload.badge! + missedCalls
-        }
-
-        /*if locKey != nil {
-         payload.contentAvailable = true
-         }*/
-
-        if locKey == nil, payload.badge == nil {
-            self.logger?.warning("[PAYLOAD] \(notification.id): Nothing to do for alert of type \(notification.type)")
-        }
-
-        if locKey != nil, let roomId = notification.roomId {
-            payload.extra["room_id"] = roomId
-        }
+        payload.extra["loc-key"] = locKey
+        payload.extra["loc-args"] = try locArgs?.makeNode()
 
         return payload
     }
