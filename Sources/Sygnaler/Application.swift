@@ -30,6 +30,8 @@ public final class Application {
         /// Passes the Droplet to have routes added from the routes folder.
         routes(drop)
 
+        try setupPushers(drop)
+
         /// Middleware is a great place to filter and modifying incoming requests and 
         /// outgoing responses.
         for middleware in middlewares {

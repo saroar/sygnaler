@@ -10,7 +10,7 @@ extension Application {
         drop.group("api") { api in
             api.resource("errors", ErrorController())
         }
-        
+
         let notificationController = NotificationController()
         notificationController.addRoutes(droplet: drop)
     }
