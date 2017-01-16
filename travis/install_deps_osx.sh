@@ -18,6 +18,8 @@ echo "⚙️  Updating Homebrew";
 brew update;
 
 echo "⚙️  Installing mysql";
+rvm install 2.2.3
+gem install xcpretty
 brew install mysql;
 brew link mysql;
 mysql.server start;

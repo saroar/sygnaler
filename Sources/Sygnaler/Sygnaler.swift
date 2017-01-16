@@ -11,7 +11,6 @@ public final class Sygnaler {
         if testing {
             // Simulate passing `--env=testing` from the
             // command line if testing is true.
-            // args.append("/dummy/path/")
             args.append("prepare")
         }
 

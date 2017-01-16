@@ -2,5 +2,6 @@ import XCTest
 @testable import SygnalerTests
 
 XCTMain([
-    testCase(SygnalerTests.allTests)
+        testCase(BasicControllerTests.allTests),
+        testCase(ErrorControllerTests.allTests)
 ])

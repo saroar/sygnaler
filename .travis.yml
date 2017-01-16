@@ -33,9 +33,6 @@ before_script:
       BUILD_ARGS="-Xswiftc -DNOJSON";
     fi
 
-  # Generate dummy files
-  - ./travis/generate_fake_certs.sh
-
 script:
   - BUILD_ARGS=$BUILD_ARGS ./travis/ci.sh
 

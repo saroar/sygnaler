@@ -60,7 +60,7 @@ fi
 
 echo "🔎 Testing";
 
-swift test $BUILD_ARGS
+swift test $BUILD_ARGS | xcpretty
 if [[ $? != 0 ]];
 then
     echo "❌ Tests failed";
