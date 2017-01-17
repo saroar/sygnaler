@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/gperdomor/sygnaler.svg?branch=master)](https://travis-ci.org/gperdomor/sygnaler)
+[![codecov](https://codecov.io/gh/gperdomor/sygnaler/branch/master/graph/badge.svg)](https://codecov.io/gh/gperdomor/sygnaler)
+
 # 📖 Introduction
 
 **sygnaler** is an alternative Push Gateway for Matrix (http://matrix.org/) written in swift.
@@ -12,6 +15,8 @@ http://matrix.org/docs/spec/push_gateway/unstable.html#post-matrix-push-r0-notif
 - [x] Push and VOIP notifications
 - [x] Sandbox and production mode
 - [x] Multiple apps
+- [ ] Support Android Apps
+- [ ] Handle errors using MySQL Database
 
 ## 🦄 Deploy
 
@@ -23,7 +28,7 @@ Fully deploy w/ MySQL Database included on Heroku.
 
 ### MySQL Config
 
-To build, the first place you'll want to look is the `Config/` directory. In their, you should create a `secrets` folder and a nested `mysql.json`. Here's how my `Config/` folder looks locally.
+To build, the first place you'll want to look is the `Config/` directory. In there, you should create a `secrets` folder and a nested `mysql.json`. Here's how my `Config/` folder looks locally.
 
 ```
 Config/
@@ -49,7 +54,7 @@ Here's an example `secrets/mysql.json`
 
 ### Pusher apps Config
 
-To configure you apps, the first place you'll create a `pushers.json` file inside `Config/secrets/`, this file must contain the configuration of all your applications in which you want receive your notifications.
+To configure your apps, the first place you'll create a `pushers.json` file inside `Config/secrets/`, this file must contains the configuration of all your applications in which you want receive your notifications.
 
 The file contains only two keys, `max_tries` as integer and `apps` as an object of **apps**.
 
@@ -76,7 +81,7 @@ openssl pkcs12 -in Certificates.p12 -out push.key.pem -nocerts -nodes
 | sandbox  | false   | Send notification using sandbox or production mode |
 | certPath | -       | The path of your certificate. Relative to `Config/certs` directory. **Required if `authKey = false`** |
 | keyPath  | -       | If `authKey = true`: the path of your Apple Authentication Key. If `authKey = false`: the path of your certificate key. In both cases the path should be relative to `Config/certs` directory. |
-| teamId   | -       | Your team Id, look your membership info at developer.apple.com s |
+| teamId   | -       | Your team Id, look your membership info at developer.apple.com |
 | keyId    | -       | The Apple Authentication Key Id, **Required if `authKey = true`** |
 
 Here's an example `secrets/pushers.json`
