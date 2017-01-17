@@ -82,7 +82,6 @@ public class Dispatcher {
                 case let .success(messageId, deviceToken, serviceStatus):
                     self.logger?.warning("[SENDING] \(notification.id): \(serviceStatus)")
                     shouldStop = serviceStatus == .success
-                    break
 
                 case let .error(messageId, deviceToken, error):
                     self.logger?.warning("[SENDING] \(notification.id): \(error)")
@@ -93,12 +92,10 @@ public class Dispatcher {
                         rejected.append(pushKey)
                         shouldStop = true
                     }
-                    break
 
                 case let .networkError(error):
                     self.logger?.warning("[SENDING] \(notification.id): \(error)")
                     shouldStop = false
-                    break
                 }
 
                 tries = tries + 1
@@ -160,21 +157,20 @@ public class Dispatcher {
             var image, contentDisplay, actionDisplay: String?
 
             if let content = notification.content?.node, let messageType: String = content["msgtype"]?.string, let body: String = content["body"]?.string {
-
                 switch (messageType) {
-                case "m.image": // Important: Not break this case
+                case "m.image":
                     image = content["url"]?.string
                     payload.extra["image"] = image
+                    contentDisplay = body
+                    
                 case "m.text":
                     contentDisplay = body
-                    break
+                    
                 case "m.emote":
                     actionDisplay = body
-                    break
 
                 default:
                     contentDisplay = body
-                    break
                 }
             }
 
