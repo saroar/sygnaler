@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/gperdomor/sygnaler.svg?branch=master)](https://travis-ci.org/gperdomor/sygnaler)
+[![codecov](https://codecov.io/gh/gperdomor/sygnaler/branch/master/graph/badge.svg)](https://codecov.io/gh/gperdomor/sygnaler)
+
 # 📖 Introduction
 
 **sygnaler** is an alternative Push Gateway for Matrix (http://matrix.org/) written in swift.
@@ -5,6 +8,15 @@
 See http://matrix.org/docs/spec/client_server/r0.2.0.html#id51 for a high level overview of how notifications work in Matrix.
 
 http://matrix.org/docs/spec/push_gateway/unstable.html#post-matrix-push-r0-notify describes the protocol that Matrix Home Servers use to send notifications to Push Gateways such as **sygnaler**
+
+## ✅ Support
+- [x] Linux and macOS
+- [x] APNS authentication and certificate authentication
+- [x] Push and VOIP notifications
+- [x] Sandbox and production mode
+- [x] Multiple apps
+- [ ] Support Android Apps
+- [ ] Handle errors using MySQL Database
 
 ## 🦄 Deploy
 
@@ -16,7 +28,7 @@ Fully deploy w/ MySQL Database included on Heroku.
 
 ### MySQL Config
 
-To build, the first place you'll want to look is the `Config/` directory. In their, you should create a `secrets` folder and a nested `mysql.json`. Here's how my `Config/` folder looks locally.
+To build, the first place you'll want to look is the `Config/` directory. In there, you should create a `secrets` folder and a nested `mysql.json`. Here's how my `Config/` folder looks locally.
 
 ```
 Config/
@@ -38,6 +50,72 @@ Here's an example `secrets/mysql.json`
   "port": "3306",
   "encoding": "utf8"
 }
+```
+
+### Pusher apps Config
+
+To configure your apps, the first place you'll create a `pushers.json` file inside `Config/secrets/`, this file must contains the configuration of all your applications in which you want receive your notifications.
+
+The file contains only two keys, `max_tries` as integer and `apps` as an object of **apps**.
+
+There are two ways you can configure an app. You can either use the new authentication key APNS authentication method or the 'old'/traditional certificates method
+
+#### 🔑 Authentication key authentication (preferred)
+
+This is the easiest to setup authentication method. Also the token never expires so you won't have to renew the private key (unlike the certificates which expire at a certain date).
+
+#### 🎫 Certificate authentication
+
+If you decide to go with the more traditional authentication method, you need to convert your push certificate, using:
+
+```
+openssl pkcs12 -in Certificates.p12 -out push.crt.pem -clcerts -nokeys
+openssl pkcs12 -in Certificates.p12 -out push.key.pem -nocerts -nodes
+```
+#### 📦 App configuration keys
+
+| Key      | Default | Description |
+|:--------:|:-------:|-------------|
+| authKey  | true    | False to use certificates. True to use Apple Authentication Key |
+| voip     | false   | True to send VOIP notifications |
+| sandbox  | false   | Send notification using sandbox or production mode |
+| certPath | -       | The path of your certificate. Relative to `Config/certs` directory. **Required if `authKey = false`** |
+| keyPath  | -       | If `authKey = true`: the path of your Apple Authentication Key. If `authKey = false`: the path of your certificate key. In both cases the path should be relative to `Config/certs` directory. |
+| teamId   | -       | Your team Id, look your membership info at developer.apple.com |
+| keyId    | -       | The Apple Authentication Key Id, **Required if `authKey = true`** |
+
+Here's an example `secrets/pushers.json`
+
+```json
+{
+  "max_tries": 3,
+  "apps": {
+    "YOUR_APP_BUNDLE_ID": {
+        "authKey": true,
+        "voip": true,
+        "teamId": "TEAM_ID",
+        "keyId": "KEY_ID",
+        "keyPath": "PATH/TO/AppleAuthenticationKey.p8",
+        "sandbox": true
+    },
+    "ONE_MORE_APP_BUNDLE_ID": {
+        "authKey": true,
+        "teamId": "TEAM_ID",
+        "keyId": "KEY_ID",
+        "keyPath": "PATH/TO/AppleAuthenticationKey.p8"
+    },
+    "OTHER_APP_BUNDLE_ID": {
+        "voip": true,
+        "certPath": "PATH/TO/certificate.pem",
+        "keyPath": "PATH/TO/certificate-key.pem"
+    },
+    "ANOTHER_APP_BUNDLE_ID": {
+        "certPath": "PATH/TO/certificate.pem",
+        "keyPath": "PATH/TO/certificate-key.pem"
+    }
+  }
+}
+
 ```
 
 ### Vapor CLI
