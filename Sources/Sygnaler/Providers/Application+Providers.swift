@@ -1,8 +1,9 @@
 import Vapor
-import VaporMySQL
+//import VaporMySQL
 
 extension Application {
     public var providers: [Vapor.Provider.Type] {
-        return [VaporMySQL.Provider.self]
+        return []
+        //return [VaporMySQL.Provider.self]
     }
 }
