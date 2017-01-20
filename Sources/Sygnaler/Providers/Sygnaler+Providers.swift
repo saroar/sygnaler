@@ -1,7 +1,7 @@
 import Vapor
 import VaporMySQL
 
-extension Application {
+extension Sygnaler {
     public var providers: [Vapor.Provider.Type] {
         return [VaporMySQL.Provider.self]
     }

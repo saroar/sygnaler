@@ -1,7 +1,7 @@
 import Vapor
 import HTTP
 
-public final class Application {
+public final class Sygnaler {
     public var drop: Droplet?
 
     public init(testing: Bool = false) throws {

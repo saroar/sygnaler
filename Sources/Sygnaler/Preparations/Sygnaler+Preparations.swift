@@ -1,6 +1,6 @@
 import Fluent
 
-extension Application {
+extension Sygnaler {
     public var preparations: [Preparation.Type] {
         return [Error.self]
     }

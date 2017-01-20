@@ -2,7 +2,7 @@ import Vapor
 import HTTP
 import Routing
 
-extension Application {
+extension Sygnaler {
     public func routes(_ drop: Droplet) {
         let basicController = BasicController(droplet: drop)
         basicController.addRoutes()

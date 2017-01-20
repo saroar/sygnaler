@@ -1,7 +1,7 @@
 import Vapor
 import HTTP
 
-extension Application {
+extension Sygnaler {
     public var middlewares: [Middleware] {
         return []
     }

@@ -1,4 +1,4 @@
 import Sygnaler
 
-let app = try Application()
+let app = try Sygnaler()
 app.start()
