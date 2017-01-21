@@ -8,32 +8,16 @@ env:
     - MYSQL_DB=sygnaler_test
     - MYSQL_PORT=3306
 
-cache:
-  directories:
-  - Packages
-
 sudo: required
 dist: trusty
 
 matrix:
-  allow_failures:
-    - osx_image: xcode8.1
   include:
     # macOS
-    - os: osx
-      osx_image: xcode8
-      env: VERSION=3.0
-    - os: osx
-      osx_image: xcode8.1
-      env: VERSION=3.0.1
     - os: osx
       osx_image: xcode8.2
       env: VERSION=3.0.2
     # Linux
-    - os: linux
-      env: VERSION=3.0
-    - os: linux
-      env: VERSION=3.0.1
     - os: linux
       env: VERSION=3.0.2
 
