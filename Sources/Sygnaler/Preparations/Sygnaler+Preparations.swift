@@ -2,6 +2,6 @@ import Fluent
 
 extension Sygnaler {
     public var preparations: [Preparation.Type] {
-        return [Error.self]
+        return [Pusher.self, Error.self]
     }
 }
