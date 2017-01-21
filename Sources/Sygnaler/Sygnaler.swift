@@ -1,3 +1,4 @@
+import Foundation
 import Vapor
 import HTTP
 
@@ -10,7 +11,7 @@ public final class Sygnaler {
         if testing {
             // Simulate passing `--env=testing` from the
             // command line if testing is true.
-            args.append("/dummy/path/")
+            // args.append("/dummy/path/")
             args.append("prepare")
         }
 
@@ -30,13 +31,13 @@ public final class Sygnaler {
         /// Passes the Droplet to have routes added from the routes folder.
         routes(drop)
 
-        try setupPushers(drop)
-
         /// Middleware is a great place to filter and modifying incoming requests and 
         /// outgoing responses.
         for middleware in middlewares {
             drop.middleware.append(middleware)
         }
+
+        try prepareDispatcher(drop)
 
         self.drop = drop
     }

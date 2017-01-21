@@ -1,3 +1,4 @@
 {
-	"key": "$VAPOR_APP_KEY"
+	"key": "$VAPOR_APP_KEY",
+    "max_tries": "$MAX_TRIES:3"
 }

@@ -1,8 +1,7 @@
-import Foundation
 import Vapor
 import VaporAPNS
 
-struct Pusher {
+struct PusherCache {
     var sender: VaporAPNS
     var sandbox: Bool
 
@@ -16,39 +15,85 @@ struct Pusher {
     }
 }
 
-public class Dispatcher {
-    private static var MAX_TRIES = 3
-    private static var logger: LogProtocol?
+class Dispatcher {
+    static let sharedInstance = Dispatcher()
 
-    private static var map: [String: Pusher] = [:]
+    private(set) var isLoaded: Bool = false
 
-    private static var `default`: Pusher?
+    private var MAX_TRIES = 3
 
-    public static func getAppIds() -> [String] {
-        return Array(self.map.keys)
+    private var certsDir: String?
+
+    private var logger: LogProtocol?
+
+    private var map: [String: PusherCache] = [:]
+
+    private var `default`: PusherCache?
+
+    private init() {
     }
 
-    public static func set(maxTries mt: Int) {
-        self.MAX_TRIES = mt
-    }
-
-    public static func set(logger _logger: LogProtocol) {
-        self.logger = _logger
-    }
-
-    static func append(id: String, sender: VaporAPNS, sandbox: Bool = false) {
-        self.map[id] = Pusher(sender: sender, sandbox: sandbox)
-    }
-
-    static func append(id: String, pusher: Pusher) {
-        self.map[id] = pusher
-    }
-
-    public static var count: Int {
+    var totalInstances: Int {
         return self.map.count
     }
 
-    static func send(notification: Notification) throws -> [String] {
+    public func loadPushersFromDB() throws {
+        let pushers = try Pusher.all()
+
+        for pusher in pushers {
+            do {
+                let _ = try self.append(pusher)
+            } catch InitializeError.keyFileDoesNotExist {
+                self.logger?.warning("[CONFIG] \(pusher.bundleId): \(InitializeError.keyFileDoesNotExist.description)")
+            } catch InitializeError.certificateFileDoesNotExist {
+                self.logger?.warning("[CONFIG] \(pusher.bundleId): \(InitializeError.certificateFileDoesNotExist.description)")
+            } catch {
+                self.logger?.error("\(error)")
+            }
+        }
+
+        if self.totalInstances == 0 {
+            self.logger?.warning("No pushers loaded.")
+        } else {
+            self.logger?.info("Loaded Pushers: \((self.getInstancesIds()).joined(separator: ", "))")
+        }
+
+        self.isLoaded = true
+    }
+
+    func set(maxTries tries: Int) {
+        self.MAX_TRIES = tries
+    }
+
+    func set(logger log: LogProtocol) {
+        self.logger = log
+    }
+
+    func set(certsDir dir: String) {
+        self.certsDir = dir
+    }
+
+    func getInstancesIds() -> [String] {
+        return Array(self.map.keys)
+    }
+
+    func getInstance(_ appId: String) -> PusherCache? {
+        return self.map[appId]
+    }
+
+    func append(_ pusher: Pusher) throws -> PusherCache {
+        let options = try buildOptions(pusher: pusher)
+        let instance = try VaporAPNS(options: options)
+        let sandbox = pusher.sandbox
+
+        let p = PusherCache(sender: instance, sandbox: sandbox)
+
+        self.map[pusher.bundleId.string!] = p
+
+        return p
+    }
+
+    func send(notification: Notification) throws -> [String] {
         var rejected = [String]()
         var payload: Payload?
         let prio: ApplePushMessage.Priority = notification.priority == Priority.high ? .immediately : .energyEfficient
@@ -58,7 +103,13 @@ public class Dispatcher {
             let appId = device.appId
             let pushKey = device.pushkey
 
-            guard let pusher = map[appId] else {
+            let instance: PusherCache
+
+            if let pusherCache = self.getInstance(appId) {
+                instance = pusherCache
+            } else if let pusher = try Pusher.query().filter("enabled", true).filter("bundle_id", appId).first() {
+                instance = try self.append(pusher)
+            } else {
                 rejected.append(pushKey)
                 self.logger?.info("Got notification for unknown app ID \(appId)")
                 continue
@@ -68,24 +119,21 @@ public class Dispatcher {
                 payload = try self.buildPayload(notification: notification)
             }
 
-            // Set tweaks for device
-
-            let pushMessage = ApplePushMessage(priority: prio, payload: payload!, sandbox: pusher.sandbox)
+            let pushMessage = ApplePushMessage(priority: prio, payload: payload!, sandbox: instance.sandbox)
 
             var shouldStop = false
 
             while tries < self.MAX_TRIES {
+                let result = instance.send(pushMessage, to: pushKey)
 
-                let result = pusher.send(pushMessage, to: pushKey)
-
-                switch (result) {
+                switch result {
                 case let .success(messageId, deviceToken, serviceStatus):
                     self.logger?.warning("[SENDING] \(notification.id): \(serviceStatus)")
                     shouldStop = serviceStatus == .success
 
                 case let .error(messageId, deviceToken, error):
                     self.logger?.warning("[SENDING] \(notification.id): \(error)")
-                    switch (error) {
+                    switch error {
                     case .tooManyRequests, .idleTimeout, .shutdown, .internalServerError, .serviceUnavailable:
                         shouldStop = false
                     default:
@@ -114,29 +162,19 @@ public class Dispatcher {
         return rejected
     }
 
-    private static func getSenderName(_ notification: Notification) -> String {
-        return notification.senderDisplayName ?? notification.sender
+    private func buildOptions(pusher: Pusher) throws -> Options {
+        let appSufix = pusher.useVOIP ? ".voip" : ""
+        let topic = "\(pusher.bundleId)\(appSufix)"
+
+        return try Options(
+                topic: topic,
+                teamId: pusher.teamId,
+                keyId: pusher.keyId,
+                keyPath: "\(self.certsDir!)\(pusher.keyPath)"
+        )
     }
 
-    private static func getBadge(_ notification: Notification) -> Int? {
-        if let counts = notification.counts {
-            var badge = 0
-
-            if let unread = counts.unread {
-                badge = badge + unread
-            }
-
-            if let missedCalls = counts.missedCalls {
-                badge = badge + missedCalls
-            }
-
-            return badge
-        }
-
-        return nil
-    }
-
-    static func buildPayload(notification: Notification) throws -> Payload {
+    private func buildPayload(notification: Notification) throws -> Payload {
         let payload = Payload()
         let fromDisplay = self.getSenderName(notification)
         var locKey: String?
@@ -149,15 +187,16 @@ public class Dispatcher {
             payload.extra["thread-id"] = roomId
         }
 
-        switch (notification.type) {
+        switch notification.type {
         case "m.room.message", "m.room.encrypted":
             payload.extra["category"] = "MESSAGE"
 
             let roomDisplayName: String? = notification.roomName ?? notification.roomAlias
             var image, contentDisplay, actionDisplay: String?
 
-            if let content = notification.content?.node, let messageType: String = content["msgtype"]?.string, let body: String = content["body"]?.string {
-                switch (messageType) {
+            if let content = notification.content?.node, let messageType: String = content["msgtype"]?.string,
+               let body: String = content["body"]?.string {
+                switch messageType {
                 case "m.image":
                     image = content["url"]?.string
                     payload.extra["image"] = image
@@ -236,5 +275,27 @@ public class Dispatcher {
         payload.extra["loc-args"] = try locArgs?.makeNode()
 
         return payload
+    }
+
+    private func getSenderName(_ notification: Notification) -> String {
+        return notification.senderDisplayName ?? notification.sender
+    }
+
+    private func getBadge(_ notification: Notification) -> Int? {
+        if let counts = notification.counts {
+            var badge = 0
+
+            if let unread = counts.unread {
+                badge = badge + unread
+            }
+
+            if let missedCalls = counts.missedCalls {
+                badge = badge + missedCalls
+            }
+
+            return badge
+        }
+
+        return nil
     }
 }

@@ -1,6 +1,4 @@
 import Vapor
-import HTTP
-import Routing
 
 extension Sygnaler {
     public func routes(_ drop: Droplet) {

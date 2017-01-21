@@ -14,6 +14,10 @@ public final class BasicController {
     }
 
     func welcome(request: Request) throws -> ResponseRepresentable {
+        if !Dispatcher.sharedInstance.isLoaded {
+            try Dispatcher.sharedInstance.loadPushersFromDB()
+        }
+
         return try drop.view.make("welcome", [
                 "version": drop.localization[request.lang, "welcome", "version"].makeNode(),
                 "build": drop.config["app", "version"]!.makeNode()
