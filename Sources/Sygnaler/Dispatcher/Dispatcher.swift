@@ -162,10 +162,10 @@ public class Dispatcher {
                     image = content["url"]?.string
                     payload.extra["image"] = image
                     contentDisplay = body
-                    
+
                 case "m.text":
                     contentDisplay = body
-                    
+
                 case "m.emote":
                     actionDisplay = body
 

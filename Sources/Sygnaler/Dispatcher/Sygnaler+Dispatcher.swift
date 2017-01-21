@@ -1,7 +1,7 @@
 import Vapor
 import VaporAPNS
 
-extension Application {
+extension Sygnaler {
     internal func setupPushers(_ drop: Droplet) throws {
         guard let config = drop.config["pushers"]?.object,
               let apps = config["apps"]?.object else {

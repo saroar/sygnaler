@@ -12,7 +12,7 @@ class SygnalerTests: XCTestCase {
     ]
 
     func testExampleEndpoint() throws {
-        let app = try Application(testing: true)
+        let app = try Sygnaler(testing: true)
         let drop = try app.getDroplet()
 
         do {
@@ -31,7 +31,7 @@ class SygnalerTests: XCTestCase {
     }
 }
 
-extension Application {
+extension Sygnaler {
     func getDroplet() throws -> Droplet {
         return self.drop!
     }
