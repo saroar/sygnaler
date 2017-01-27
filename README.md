@@ -26,32 +26,6 @@ Fully deploy w/ MySQL Database included on Heroku.
 
 ## 🛠 Setup
 
-### MySQL Config
-
-To build, the first place you'll want to look is the `Config/` directory. In there, you should create a `secrets` folder and a nested `mysql.json`. Here's how my `Config/` folder looks locally.
-
-```
-Config/
-  - mysql.json
-	secrets/
-	  - mysql.json
-```
-
-The `secrets` folder is under the gitignore and shouldn't be committed.
-
-Here's an example `secrets/mysql.json`
-
-```json
-{
-  "host": "z99a0.asdf8c8cx.us-east-1.rds.amazonaws.com",
-  "user": "username",
-  "password": "badpassword",
-  "database": "databasename",
-  "port": "3306",
-  "encoding": "utf8"
-}
-```
-
 ### Pusher apps Config
 
 To configure your apps, the first place you'll create a `pushers.json` file inside `Config/secrets/`, this file must contains the configuration of all your applications in which you want receive your notifications.
@@ -117,6 +91,19 @@ Here's an example `secrets/pushers.json`
 }
 
 ```
+### SwiftBeaver Integration
+
+**Sygnaler** use SwiftBeaver to handle logs to console by default. You also can configure Sygnaler to use SwiftBeaver
+Cloud Platform configuring your keys in `Config/secrets/app.json`
+
+```json
+{
+  "sb_app_id": "MY_APP_ID",
+  "sb_secret_key": "SECRET_KEY",
+  "sb_encryption_key": "ENCRYPTION_KEY"
+}
+```
+if you are in production mode you can configure using the following env vars: `$VAPOR_SB_APP_ID`, `$VAPOR_SB_SECRET_KEY` and `$VAPOR_SB_ENCRYPTION_KEY`
 
 ### Vapor CLI
 

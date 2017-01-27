@@ -1,4 +1,7 @@
 {
   "key": "sygnaler",
-  "version": "0.1.0-beta"
+  "version": "0.1.0-beta",
+  "sb_app_id": "",
+  "sb_secret_key": "",
+  "sb_encryption_key": ""
 }

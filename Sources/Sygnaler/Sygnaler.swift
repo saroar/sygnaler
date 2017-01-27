@@ -15,28 +15,27 @@ public final class Sygnaler {
         /// Droplets are service containers that make accessing all of Vapor's features easy.
         /// Just call `drop.run()` to serve your application or `drop.client()` to create a
         /// client for request data from other servers.
-        let drop = Droplet(arguments: args)
+        self.drop = Droplet(arguments: args)
 
         for provider in providers {
-            try drop.addProvider(provider)
+            print(provider.name)
+            self.drop!.addProvider(provider)
         }
 
         for preparation in preparations {
-            drop.preparations.append(preparation)
+            self.drop!.preparations.append(preparation)
         }
 
         /// Passes the Droplet to have routes added from the routes folder.
-        routes(drop)
+        routes(self.drop!)
 
-        try setupPushers(drop)
+        try setupPushers(self.drop!)
 
         /// Middleware is a great place to filter and modifying incoming requests and 
         /// outgoing responses.
         for middleware in middlewares {
-            drop.middleware.append(middleware)
+            self.drop!.middleware.append(middleware)
         }
-
-        self.drop = drop
     }
 
     /// Starts the application by serving the Droplet.

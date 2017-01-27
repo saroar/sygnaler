@@ -1,3 +1,6 @@
 {
-  "key": "$VAPOR_APP_KEY"
+  "key": "$VAPOR_APP_KEY",
+  "sb_app_id": "$VAPOR_SB_APP_ID",
+  "sb_secret_key": "$VAPOR_SB_SECRET_KEY",
+  "sb_encryption_key": "$VAPOR_SB_ENCRYPTION_KEY"
 }
