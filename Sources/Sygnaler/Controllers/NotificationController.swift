@@ -3,7 +3,7 @@ import HTTP
 
 final class NotificationController {
     func addRoutes(droplet: Droplet) {
-        droplet.post("matrix/push/v1/notify", handler: notify)
+        droplet.post("_matrix/push/v1/notify", handler: notify)
     }
 
     func notify(request: Request) throws -> ResponseRepresentable {
