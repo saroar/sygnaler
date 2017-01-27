@@ -1,3 +1,4 @@
+import Vapor
 import HTTP
 
 extension Sygnaler {

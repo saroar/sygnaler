@@ -1,5 +1,4 @@
 {
 	"key": "default-key",
-    "version": "0.0.1-alpha",
-    "max_tries": 3
+    "version": "0.0.1-alpha"
 }

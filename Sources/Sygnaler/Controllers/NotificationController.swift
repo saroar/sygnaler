@@ -1,5 +1,6 @@
 import Vapor
 import HTTP
+import Routing
 
 final class NotificationController {
     func addRoutes(droplet: Droplet) {
