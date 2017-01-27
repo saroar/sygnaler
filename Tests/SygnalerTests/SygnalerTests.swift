@@ -8,7 +8,7 @@ import HTTP
 
 class SygnalerTests: XCTestCase {
     static var allTests = [
-        ("testExampleEndpoint", testExampleEndpoint)
+            ("testExampleEndpoint", testExampleEndpoint)
     ]
 
     func testExampleEndpoint() throws {
@@ -25,9 +25,9 @@ class SygnalerTests: XCTestCase {
 
         let response = try drop.respond(to: request)
         XCTAssertEqual(response.status, .ok)
-        
+
         let json = try JSON(bytes: response.body.bytes!)
-        XCTAssertEqual(json["version"]?.string, "0.0.1-alpha")
+        XCTAssertEqual(json["version"]?.string, "0.1.0-beta")
     }
 }
 

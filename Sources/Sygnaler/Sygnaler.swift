@@ -1,5 +1,4 @@
 import Vapor
-import HTTP
 
 public final class Sygnaler {
     public var drop: Droplet?
@@ -10,7 +9,6 @@ public final class Sygnaler {
         if testing {
             // Simulate passing `--env=testing` from the
             // command line if testing is true.
-            args.append("/dummy/path/")
             args.append("prepare")
         }
 

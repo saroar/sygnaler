@@ -5,7 +5,9 @@ extension Sygnaler {
     internal func setupPushers(_ drop: Droplet) throws {
         guard let config = drop.config["pushers"]?.object,
               let apps = config["apps"]?.object else {
-            throw AppError.noPusherConfig
+            drop.log.error("\(AppError.noPusherConfig)")
+            return
+            //throw AppError.noPusherConfig
         }
 
         Dispatcher.set(maxTries: config["max_tries"]?.int ?? 3)
@@ -31,7 +33,8 @@ extension Sygnaler {
         }
 
         if Dispatcher.count == 0 {
-            throw AppError.noAppsConfigured
+            drop.log.error("\(AppError.noAppsConfigured)")
+            //throw AppError.noAppsConfigured
         }
 
         drop.log.info("Configured with app IDs \((Dispatcher.getAppIds()).joined(separator: ", "))")
@@ -41,7 +44,7 @@ extension Sygnaler {
         let authKey = config["authKey"]?.bool ?? false
         let appSufix = config["voip"]?.bool == true ? ".voip" : ""
         let topic = "\(appId)\(appSufix)"
-        let certDirs = "\(workDir)Config/certs/"
+        let certDirs = "\(workDir)Config/secrets/certs/"
 
         if authKey {
             guard let keyPath = config["keyPath"]?.string else {

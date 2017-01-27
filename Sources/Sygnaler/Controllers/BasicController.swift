@@ -16,24 +16,25 @@ public final class BasicController {
     func welcome(request: Request) throws -> ResponseRepresentable {
         return try drop.view.make("welcome", [
                 "version": drop.localization[request.lang, "welcome", "version"].makeNode(),
-                "build": drop.config["app", "version"]!.makeNode()
+                "build": drop.config["app", "version"]!.makeNode(),
+                "apps": Dispatcher.count > 0
         ])
     }
 
     func version(request: Request) throws -> ResponseRepresentable {
-        guard let database = drop.database else {
+        /*guard let database = drop.database else {
             return JSON(["error": "Your database is not set up. Please see the README.md."])
         }
 
         guard let version = try database.driver.raw("SELECT @@version AS version")[0]?.object?["version"]?.string else {
             return JSON(["error": "Could not get database version."])
-        }
+        }*/
 
         let appVersion = drop.config["app", "version"]?.string ?? "unknown"
 
         return JSON([
-                "version": appVersion.makeNode(),
-                "db-version": version.makeNode()
+                "version": appVersion.makeNode()
+                //"db-version": version.makeNode()
         ])
     }
 }
