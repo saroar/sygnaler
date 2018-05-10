@@ -2,7 +2,6 @@ Packages
 .build
 xcuserdata
 *.xcodeproj
-Config/secrets
 Config/certs/*
 !Config/certs/.gitkeep
 
